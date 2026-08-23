@@ -44,6 +44,8 @@
   .original-pin:before{width:28px;height:2px}.original-pin:after{width:2px;height:28px}
 }
 
+.pin-control{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 18px}.pin-control label{margin:0;font-size:13px}.pin-control input[type=range]{width:min(260px,60vw);padding:0;accent-color:#e7c986}.pin-control output{min-width:46px;text-align:center;color:#fff;font-size:13px}
+
 </style>
 </head>
 <body><div class="wrap">
@@ -52,6 +54,7 @@
 <div class="sub">レベル・列・座席番号を入力すると、座席表上で該当位置を確認できます。</div>
 </header>
 <div class="tabs" id="tabs"></div>
+<div class="pin-control"><label for="pinSize">ピンの大きさ</label><input id="pinSize" type="range" min="25" max="160" value="100" step="5"><output id="pinSizeValue">100%</output></div>
 <div class="card">
 <div class="grid">
 <div><label>列（Row）</label><input id="row" type="number" min="1" placeholder="例: 12"></div>
@@ -401,6 +404,22 @@ document.getElementById('go').onclick=async()=>{
   await renderZoom(p,true);
   result.scrollIntoView({behavior:'smooth',block:'start'});
 };
+
+const pinSizeSlider=document.getElementById('pinSize');
+const pinSizeValue=document.getElementById('pinSizeValue');
+function applyPinSize(percent){
+  const scale=percent/100;
+  document.querySelectorAll('.pin,#zoomPin,.original-pin').forEach(el=>{
+    el.style.setProperty('--pin-user-scale',scale);
+    el.style.transform=`translate(-50%,-50%) scale(${scale})`;
+  });
+  pinSizeValue.textContent=percent+'%';
+  localStorage.setItem('kArenaPinSize',percent);
+}
+const savedPinSize=parseInt(localStorage.getItem('kArenaPinSize')||'100',10);
+pinSizeSlider.value=Math.min(160,Math.max(25,savedPinSize));
+applyPinSize(Number(pinSizeSlider.value));
+pinSizeSlider.addEventListener('input',()=>applyPinSize(Number(pinSizeSlider.value)));
 
 </script>
 </body>
